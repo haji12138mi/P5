@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>地球online 读博版</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <meta name="theme-color" content="#020617" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="地球online" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #ffffff;
+      --soft: #f8fafc;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #020617;
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; border: 0; }
+    .shell {
+      width: min(430px, 100%);
+      margin: 0 auto;
+      min-height: 100vh;
+      background: linear-gradient(#f1f5f9, #fff, #f8fafc);
+      padding-bottom: calc(86px + env(safe-area-inset-bottom));
+      box-shadow: 0 25px 80px rgba(0,0,0,.35);
+    }
+    .hero {
+      padding: calc(18px + env(safe-area-inset-top)) 20px 18px;
+      color: white;
+      background: var(--accent);
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+    }
+    h1 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+    .subtitle { margin-top: 6px; opacity: .82; font-size: 13px; }
+    .content { padding: 12px; display: grid; gap: 12px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+    }
+    .card h2 { font-size: 18px; margin: 0 0 12px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .stat { margin: 10px 0; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .label { color: var(--muted); font-size: 12px; }
+    .value { font-variant-numeric: tabular-nums; color: #334155; font-size: 12px; }
+    .bar { height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-top: 6px; }
+    .fill { height: 100%; background: var(--accent); border-radius: 999px; }
+    .skill { background: white; border: 1px solid var(--line); border-radius: 18px; padding: 12px; }
+    .badge { border-radius: 999px; background: #f1f5f9; padding: 4px 8px; font-size: 11px; color: #334155; }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .btn.secondary { background: #f1f5f9; color: #0f172a; border: 1px solid var(--line); }
+    .btn.danger { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 14px;
+      min-height: 38px;
+      padding: 8px 10px;
+      color: var(--text);
+    }
+    input[type=color].input { padding: 3px; }
+    .mini { display: grid; gap: 5px; }
+    .actions { display:grid; gap: 10px; }
+    .action {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+    }
+    .hint { color: var(--muted); font-size: 12px; line-height: 1.6; background: var(--soft); border-radius: 14px; padding: 9px; }
+    .log { display:grid; gap: 8px; }
+    .logItem { background: var(--soft); color: #475569; border-radius: 16px; padding: 10px; font-size: 12px; line-height: 1.55; }
+    .tabs {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      pointer-events: none;
+    }
+    .tabs-inner {
+      pointer-events: auto;
+      max-width: 430px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(14px);
+      border-radius: 24px;
+      padding: 8px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, .22);
+    }
+    .tab {
+      border-radius: 16px;
+      padding: 9px 2px;
+      font-size: 12px;
+      background: transparent;
+      color: #475569;
+    }
+    .tab.active { background: var(--accent); color: white; }
+    .hidden { display: none; }
+    .spend-day { min-height: 44px; background: var(--soft); border-radius: 12px; padding: 6px 3px; text-align:center; font-size: 11px; }
+    .red { color: #e11d48; }
+    .green { color: #059669; }
+    .chart { width:100%; height:160px; background: var(--soft); border-radius: 16px; padding: 10px; }
+    .tiny { font-size: 11px; color: var(--muted); line-height:1.6; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+<script>
+const SAVE_KEY = "life-planning-game-save-v1";
+const WEEKLY_AMBITION_PENALTY_KEY = `${SAVE_KEY}-weekly-ambition-penalty-date`;
+const INITIAL_WEIGHT = 156;
+const NORMAL_WEIGHT = 120;
+const DEFAULT_PAGE_COLOR = "#020617";
+
+const skillLevels = [
+  { name: "新手", need: 100 },
+  { name: "入门", need: 500 },
+  { name: "精通", need: 2000 },
+  { name: "专家", need: 10000 },
+];
+
+const skillDisplayOrder = ["科研", "外语", "唱歌", "Python", "健身"];
+const statLabels = { weight: "体重", health: "健康值", knowledge: "知识", ambition: "进取心" };
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const round2 = (value) => Math.round(Number(value || 0) * 100) / 100;
+const toNum = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+const makeId = () => `${Date.now()}-${Math.random()}`;
+const pad2 = (value) => String(value).padStart(2, "0");
+const getLocalDateISO = (date = new Date()) => `${date.getFullYear()}-${pad2(date.getMonth()+1)}-${pad2(date.getDate())}`;
+const getLocalMonthISO = (date = new Date()) => `${date.getFullYear()}-${pad2(date.getMonth()+1)}`;
+const getChartDateLabel = (date = new Date()) => `${pad2(date.getMonth()+1)}-${pad2(date.getDate())}`;
+const getTodayText = () => new Date().toLocaleDateString("zh-CN", { year:"numeric", month:"2-digit", day:"2-digit" });
+const getDateTimeText = () => new Date().toLocaleString("zh-CN", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+
+function calculateWeightPointTotal(weight) {
+  const lost = Math.max(0, INITIAL_WEIGHT - weight);
+  const fullJin = Math.floor(lost);
+  let total = 0;
+  for (let i = 0; i < fullJin; i += 1) {
+    const tier = Math.floor(i / 10);
+    total += 10 + tier * 5;
+  }
+  return total;
+}
+function calculateHealthFromWeight(weight) {
+  const obeseLoss = Math.max(0, INITIAL_WEIGHT - Math.max(weight, NORMAL_WEIGHT));
+  return round2(obeseLoss * 0.1);
+}
+
+const defaultState = () => ({
+  tab: "dashboard",
+  stats: { weight: 156, health: 50, knowledge: 15, ambition: 15 },
+  skills: {
+    科研: { levelIndex: 0, exp: 0 },
+    外语: { levelIndex: 0, exp: 0 },
+    唱歌: { levelIndex: 0, exp: 0 },
+    Python: { levelIndex: 0, exp: 0 },
+    健身: { levelIndex: 0, exp: 0 },
+  },
+  paperProgress: 0,
+  paperAccepted: false,
+  points: 0,
+  weightInput: "156",
+  weightPointsApplied: 0,
+  weightHealthApplied: 0,
+  dailyGain: { readPaperResearch: 0, readPaperAmbition: 0, date: getLocalDateISO() },
+  actionMinutes: { readBook: "60", learnLanguage: "60", learnSkill: "60" },
+  selectedSkill: "Python",
+  log: [{ id:"init", message:"欢迎进入地球 Online：把现实行动数据化，慢慢升级。", snapshot:null, undone:false }],
+  redeemed: [],
+  pointHistory: [{ id:"init-points", date:getDateTimeText(), reason:"初始积分", change:0, before:0, after:0 }],
+  history: [{ day:1, date:getLocalDateISO(), label:getChartDateLabel(), health:50, knowledge:15, ambition:15, weight:156 }],
+  customAction: { name:"早睡", stat:"health", skill:"none", statAmount:"0.02", skillAmount:"0.02", points:"1", unit:"time" },
+  customActions: [],
+  customActionRunHours: {},
+  newSkillName: "",
+  customReward: { name:"奶茶", cost:"80" },
+  shopItems: [{ name:"韩国轮船游", cost:5000 }, { name:"和田玉手串", cost:500 }, { name:"商场购物额度", cost:1000 }],
+  ledgerForm: { date:getLocalDateISO(), name:"", amount:"" },
+  ledgerMonth: getLocalMonthISO(),
+  ledger: [],
+  pageColor: DEFAULT_PAGE_COLOR,
+  weeklyAmbitionPenaltyDate: "",
+});
+
+let state = loadState();
+
+function loadState() {
+  const s = defaultState();
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return s;
+    const parsed = JSON.parse(raw);
+    return { ...s, ...parsed, tab:"dashboard", pageColor: parsed.pageColor || DEFAULT_PAGE_COLOR };
+  } catch {
+    return s;
+  }
+}
+function saveState() {
+  localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, tab: undefined }));
+}
+function setState(patch) {
+  state = { ...state, ...patch };
+  saveState();
+  render();
+}
+function snapshot() {
+  return JSON.parse(JSON.stringify({ ...state, tab: undefined }));
+}
+function restoreSnapshot(snap) {
+  state = { ...state, ...snap, tab: state.tab };
+  saveState(); render();
+}
+function addSystemLog(message) {
+  state.log = [{ id:makeId(), message, snapshot:null, undone:false }, ...state.log].slice(0, 20);
+}
+function addLog(message, snap=null) {
+  state.log = [{ id:makeId(), message, snapshot:snap, undone:false }, ...state.log].slice(0, 20);
+}
+function changePoints(change, reason) {
+  const pointChange = round2(change);
+  const before = round2(state.points);
+  const after = round2(state.points + pointChange);
+  state.points = after;
+  state.pointHistory = [{ id:makeId(), date:getDateTimeText(), reason, change:pointChange, before, after }, ...state.pointHistory].slice(0, 30);
+}
+function recordHistory(nextStats) {
+  const now = new Date();
+  state.history = [...state.history, {
+    day: state.history.length + 1,
+    date: getLocalDateISO(now),
+    label: getChartDateLabel(now),
+    health: round2(nextStats.health),
+    knowledge: round2(nextStats.knowledge),
+    ambition: round2(nextStats.ambition),
+    weight: round2(nextStats.weight)
+  }].slice(-14);
+}
+function addStats(delta) {
+  const prev = state.stats;
+  const next = {
+    weight: delta.weight !== undefined ? round2(prev.weight + delta.weight) : prev.weight,
+    health: delta.health !== undefined ? round2(clamp(prev.health + delta.health, 0, 100)) : prev.health,
+    knowledge: delta.knowledge !== undefined ? round2(clamp(prev.knowledge + delta.knowledge, 0, 100)) : prev.knowledge,
+    ambition: delta.ambition !== undefined ? round2(clamp(prev.ambition + delta.ambition, 0, 100)) : prev.ambition,
+  };
+  state.stats = next;
+  recordHistory(next);
+}
+function addSkillExp(skillName, amount) {
+  if (!skillName || !state.skills[skillName]) return;
+  const current = state.skills[skillName];
+  const level = skillLevels[current.levelIndex];
+  let nextLevelIndex = current.levelIndex;
+  let nextExp = round2(current.exp + amount);
+  if (nextExp >= level.need && nextLevelIndex < skillLevels.length - 1) {
+    nextLevelIndex += 1;
+    nextExp = 0;
+    addSystemLog(`${skillName} 升级为「${skillLevels[nextLevelIndex].name}」，经验值已重置为 0。`);
+  } else if (nextExp >= level.need) {
+    nextExp = level.need;
+    addSystemLog(`${skillName} 已达到专家阶段经验上限。`);
+  }
+  state.skills[skillName] = { levelIndex: nextLevelIndex, exp: nextExp };
+}
+function resetDailyGainIfNeeded() {
+  const today = getLocalDateISO();
+  if (state.dailyGain.date !== today) {
+    state.dailyGain = { readPaperResearch: 0, readPaperAmbition: 0, date: today };
+  }
+}
+function applyWeeklyAmbitionPenalty() {
+  const now = new Date();
+  if (now.getDay() !== 0) return;
+  const today = getLocalDateISO(now);
+  const already = localStorage.getItem(WEEKLY_AMBITION_PENALTY_KEY) || state.weeklyAmbitionPenaltyDate;
+  if (already === today) return;
+  localStorage.setItem(WEEKLY_AMBITION_PENALTY_KEY, today);
+  state.weeklyAmbitionPenaltyDate = today;
+  state.stats = { ...state.stats, ambition: round2(clamp(state.stats.ambition - 0.1, 0, 100)) };
+  recordHistory(state.stats);
+  addSystemLog("周日结算：进取心 -0.1。");
+  saveState();
+}
+resetDailyGainIfNeeded();
+applyWeeklyAmbitionPenalty();
+
+function statBar(label, value, max=100, suffix="") {
+  const percent = max === 0 ? 0 : clamp((value / max) * 100, 0, 100);
+  return `<div class="stat"><div class="row"><span class="label">${label}</span><span class="value">${round2(value)}${suffix}${max===100?" / 100":""}</span></div><div class="bar"><div class="fill" style="width:${percent}%"></div></div></div>`;
+}
+function skillCard(name, skill) {
+  const level = skillLevels[skill.levelIndex] || skillLevels[0];
+  const percent = clamp((skill.exp / level.need) * 100, 0, 100);
+  return `<div class="skill"><div class="row"><b>${name}</b><span class="badge">${level.name}</span></div><div class="bar"><div class="fill" style="width:${percent}%"></div></div><div class="row tiny"><span>经验 ${round2(skill.exp)}</span><span>升级 ${level.need}</span></div></div>`;
+}
+function chartSvg(key, label) {
+  const data = state.history;
+  const w = 390, h = 140, p = 18;
+  if (data.length < 2) return `<div class="chart tiny">数据积累后会显示曲线。</div>`;
+  const vals = data.map(d => Number(d[key]));
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min || 1;
+  const pts = data.map((d,i) => {
+    const x = p + i * ((w-p*2)/(data.length-1));
+    const y = h - p - ((Number(d[key])-min)/range) * (h-p*2);
+    return `${x},${y}`;
+  }).join(" ");
+  return `<div class="chart"><svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    ${data.map((d,i)=>`<text x="${p + i*((w-p*2)/(data.length-1))}" y="${h-2}" font-size="9" text-anchor="middle" fill="#64748b">${d.label}</text>`).join("")}
+    <text x="8" y="12" font-size="11" fill="#64748b">${label}</text>
+  </svg></div>`;
+}
+function orderedSkills() {
+  const names = [...skillDisplayOrder.filter(n => state.skills[n]), ...Object.keys(state.skills).filter(n => !skillDisplayOrder.includes(n))];
+  return names.map(n => [n, state.skills[n]]);
+}
+function activeLedger() { return state.ledger.filter(i => !i.undone); }
+
+function dashboard() {
+  return `<div class="content">
+    <div class="card"><h2>人物属性</h2>
+      ${statBar("体重", state.stats.weight, INITIAL_WEIGHT, " 斤")}
+      ${statBar("健康值", state.stats.health)}
+      ${statBar("知识", state.stats.knowledge)}
+      ${statBar("进取心", state.stats.ambition)}
+    </div>
+    <div class="grid2">${orderedSkills().map(([n,s])=>skillCard(n,s)).join("")}</div>
+    <div class="card"><h2>属性成长曲线</h2>${chartSvg("ambition", "进取心 / 健康 / 知识曲线参考")}</div>
+    <div class="card"><h2>体重曲线</h2>${chartSvg("weight", "体重")}</div>
+    <div class="card"><h2>成长日志</h2><div class="log">${state.log.slice(0,8).map(item => `<div class="logItem">${item.message}${item.snapshot && !item.undone ? `<br><button class="btn secondary" data-undo="${item.id}">撤回</button>` : ""}</div>`).join("")}</div></div>
+  </div>`;
+}
+function actionRow(label, hint, id, extra="") {
+  return `<div class="action"><div class="row"><b>${label}</b><button class="btn" data-action="${id}">完成</button></div>${extra}<div class="hint">${hint}</div></div>`;
+}
+function actions() {
+  const skillOptions = Object.keys(state.skills).map(n=>`<option value="${n}" ${state.selectedSkill===n?"selected":""}>${n}</option>`).join("");
+  return `<div class="content">
+    <div class="card"><div class="row"><div class="mini" style="flex:1"><label class="label">当前体重（斤）</label><input class="input" id="weightInput" type="number" value="${state.weightInput}"></div><button class="btn" data-action="updateWeight">更新</button></div></div>
+    <div class="card"><h2>今日行动</h2><div class="hint">读文献今日加成：科研 ${state.dailyGain.readPaperResearch}/0.1，进取心 ${state.dailyGain.readPaperAmbition}/0.1</div><div class="actions">
+      ${actionRow("读文献", "科研经验 +0.01，进取心 +0.01。科研和进取心每日最多各加 0.1。积分 +1。", "readLiterature")}
+      ${actionRow("写论文", `当前论文进度 ${state.paperProgress}%。每次：科研经验 +0.01，进取心 +0.01，积分 +1。完成一篇后额外获得科研经验 +1，进取心 +1。`, "writePaper")}
+      ${actionRow("读书", "按分钟结算。60 分钟：知识 +0.01，积分 +1。", "readBook", `<div class="mini"><label class="label">分钟</label><input class="input" id="readBookMinutes" type="number" value="${state.actionMinutes.readBook}"></div>`)}
+      ${actionRow("学外语", "按分钟结算。60 分钟：外语技能经验 +0.01，积分 +1。", "learnLanguage", `<div class="mini"><label class="label">分钟</label><input class="input" id="learnLanguageMinutes" type="number" value="${state.actionMinutes.learnLanguage}"></div>`)}
+      ${actionRow("学技能", `按分钟结算。60 分钟：${state.selectedSkill} 技能经验 +0.01，积分 +1。`, "learnSkill", `<div class="grid2"><div class="mini"><label class="label">技能</label><select id="selectedSkill">${skillOptions}</select></div><div class="mini"><label class="label">分钟</label><input class="input" id="learnSkillMinutes" type="number" value="${state.actionMinutes.learnSkill}"></div></div>`)}
+      ${actionRow("轻度运动", "健康 +0.02，进取心 +0.02，健身技能经验 +0.02，积分 +1。", "lightWorkout")}
+      ${actionRow("中度运动", "健康 +0.05，进取心 +0.05，健身技能经验 +0.05，积分 +1。", "mediumWorkout")}
+      ${actionRow("唱歌", "唱歌技能经验 +0.01，积分 +1。", "sing")}
+    </div></div>
+  </div>`;
+}
+function shop() {
+  return `<div class="content">
+    <div class="card"><div class="row"><h2>积分兑换</h2><span class="badge">${state.points} 积分</span></div>
+      <div class="actions">${[...state.shopItems].sort((a,b)=>a.cost-b.cost).map(item=>`<div class="action"><div><b>${item.name}</b><div class="label">需要 ${item.cost} 积分</div></div><button class="btn" data-redeem="${item.name}" ${state.points<item.cost?"disabled":""}>兑换</button></div>`).join("")}</div>
+    </div>
+    <div class="card"><h2>已兑换奖励</h2><div class="log">${state.redeemed.length ? state.redeemed.map(i=>`<div class="logItem"><b>${i.name}</b><br>${i.date} ｜ 消耗 ${i.cost} 积分</div>`).join("") : `<div class="logItem">还没有兑换。继续行动积累积分。</div>`}</div></div>
+    <div class="card"><h2>积分变化过程</h2><div class="log">${state.pointHistory.map(i=>`<div class="logItem"><div class="row"><b>${i.reason}</b><span class="${i.change>=0?'green':'red'}">${i.change>=0?'+':''}${i.change}</span></div>${i.date} ｜ ${i.before} → ${i.after}</div>`).join("")}</div></div>
+  </div>`;
+}
+function ledger() {
+  const todayISO = getLocalDateISO();
+  const active = activeLedger();
+  const todaySpend = round2(active.filter(i=>i.date===todayISO).reduce((s,i)=>s+i.amount,0));
+  const monthSpend = round2(active.filter(i=>i.date.startsWith(state.ledgerMonth)).reduce((s,i)=>s+i.amount,0));
+  const monthLedger = state.ledger.filter(i=>i.date.startsWith(state.ledgerMonth));
+  const [year, month] = state.ledgerMonth.split("-").map(Number);
+  const firstDay = new Date(year, month-1, 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const blankCount = firstDay.getDay();
+  const dailyMap = {};
+  active.forEach(i => { if (i.date.startsWith(state.ledgerMonth)) { const d=Number(i.date.slice(8,10)); dailyMap[d]=round2((dailyMap[d]||0)+i.amount); }});
+  const days = [...Array(blankCount).fill(null), ...Array.from({length:daysInMonth}, (_,i)=>i+1)];
+  return `<div class="content">
+    <div class="card"><div class="row"><h2>记账</h2><input class="input" style="width:135px" type="month" id="ledgerMonth" value="${state.ledgerMonth}"></div>
+      <div class="grid3"><input class="input" type="date" id="ledgerDate" value="${state.ledgerForm.date}"><input class="input" id="ledgerName" placeholder="项目" value="${state.ledgerForm.name}"><input class="input" type="number" id="ledgerAmount" placeholder="金额" value="${state.ledgerForm.amount}"></div>
+      <br><button class="btn" style="width:100%" data-action="addLedger">添加记账</button>
+      <div class="grid2" style="margin-top:10px"><div class="skill"><span class="label">本日花费</span><h2>${todaySpend} 元</h2></div><div class="skill"><span class="label">本月花费</span><h2>${monthSpend} 元</h2></div></div>
+    </div>
+    <div class="card"><h2>日历花费</h2><div class="grid2" style="grid-template-columns:repeat(7,1fr);font-size:11px;text-align:center;color:#64748b">${["日","一","二","三","四","五","六"].map(d=>`<div>${d}</div>`).join("")}</div><div class="grid2" style="grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px">${days.map(d=>d?`<div class="spend-day"><b>${d}</b>${dailyMap[d]?`<div class="red">${dailyMap[d]}</div>`:""}</div>`:`<div></div>`).join("")}</div></div>
+    <div class="card"><h2>本月明细</h2><div class="log">${monthLedger.length ? monthLedger.map(i=>`<div class="logItem ${i.undone?'label':''}"><div class="row"><div><b>${i.name}</b><br>${i.date} ｜ ${i.amount} 元 ${i.undone?'｜ 已撤销':''}</div>${!i.undone?`<button class="btn secondary" data-undo-ledger="${i.id}">撤销</button>`:""}</div></div>`).join("") : `<div class="logItem">本月还没有记账。</div>`}</div></div>
+  </div>`;
+}
+function custom() {
+  const skillOptions = Object.keys(state.skills).map(n=>`<option value="${n}">${n}</option>`).join("");
+  const statOptions = `<option value="none">不影响属性</option><option value="health">健康值</option><option value="knowledge">知识</option><option value="ambition">进取心</option><option value="weight">体重</option>`;
+  return `<div class="content">
+    <div class="card"><h2>自定义技能</h2><div class="mini"><label class="label">技能名称</label><input class="input" id="newSkillName" value="${state.newSkillName}" placeholder="例如：统计学"></div><br><button class="btn" style="width:100%" data-action="addSkill">添加技能</button></div>
+    <div class="card"><h2>自定义行动</h2>
+      <div class="mini"><label class="label">行动名称</label><input class="input" id="customActionName" value="${state.customAction.name}"></div>
+      <div class="grid2" style="margin-top:8px"><div class="mini"><label class="label">结算方式</label><select id="customUnit"><option value="time" ${state.customAction.unit==="time"?"selected":""}>按次</option><option value="hour" ${state.customAction.unit==="hour"?"selected":""}>按小时</option></select></div><div class="mini"><label class="label">影响属性</label><select id="customStat">${statOptions.replace(`value="${state.customAction.stat}"`, `value="${state.customAction.stat}" selected`)}</select></div></div>
+      <div class="grid2" style="margin-top:8px"><div class="mini"><label class="label">属性变化</label><input class="input" type="number" id="customStatAmount" value="${state.customAction.statAmount}"></div><div class="mini"><label class="label">影响技能</label><select id="customSkill"><option value="none">不影响技能</option>${skillOptions}</select></div></div>
+      <div class="grid2" style="margin-top:8px"><div class="mini"><label class="label">技能经验</label><input class="input" type="number" id="customSkillAmount" value="${state.customAction.skillAmount}"></div><div class="mini"><label class="label">获得积分</label><input class="input" type="number" id="customPoints" value="${state.customAction.points}"></div></div>
+      <br><button class="btn" style="width:100%" data-action="addCustomAction">添加行动</button>
+      <div class="actions" style="margin-top:10px">${state.customActions.map((a,i)=>`<div class="action"><b>${a.name}</b><div class="tiny">${a.stat!=="none"?`${statLabels[a.stat]} ${a.statAmount>=0?"+":""}${a.statAmount}${a.unit==="hour"?"/小时":""}`:""} ${a.skill!=="none"?`，${a.skill}技能经验 ${a.skillAmount>=0?"+":""}${a.skillAmount}${a.unit==="hour"?"/小时":""}`:""}，积分 ${a.points>=0?"+":""}${a.points}${a.unit==="hour"?"/小时":""}</div>${a.unit==="hour"?`<input class="input" type="number" data-custom-hours="${i}" placeholder="本次小时数">`:""}<button class="btn" data-run-custom="${i}">完成行动</button></div>`).join("")}</div>
+    </div>
+    <div class="card"><h2>自定义兑换</h2><div class="grid2"><input class="input" id="rewardName" value="${state.customReward.name}" placeholder="奖励名称"><input class="input" type="number" id="rewardCost" value="${state.customReward.cost}" placeholder="需要积分"></div><br><button class="btn" style="width:100%" data-action="addReward">添加奖励</button></div>
+    <div class="card"><h2>自定义页面颜色</h2><div class="grid2"><input class="input" type="color" id="pageColor" value="${state.pageColor}"><input class="input" id="pageColorText" value="${state.pageColor}"></div></div>
+    <div class="card"><h2>数据管理</h2><div class="grid3"><button class="btn" data-action="export">导出数据</button><label class="btn" style="text-align:center">导入数据<input type="file" id="importFile" accept=".json,application/json" hidden></label><button class="btn danger" data-action="clear">清空数据</button></div><p class="tiny">数据自动保存在当前浏览器。长期使用建议定期导出备份。</p></div>
+  </div>`;
+}
+
+function render() {
+  document.documentElement.style.setProperty("--bg", state.pageColor || DEFAULT_PAGE_COLOR);
+  document.documentElement.style.setProperty("--accent", state.pageColor || DEFAULT_PAGE_COLOR);
+  const view = { dashboard, actions, shop, ledger, custom }[state.tab]();
+  $("#app").innerHTML = `<main class="shell"><section class="hero"><h1>地球online 读博版</h1><div class="subtitle">PWA 版 · 添加到主屏幕后更像独立 App</div></section>${view}</main>
+    <nav class="tabs"><div class="tabs-inner">${[
+      ["dashboard","面板"],["actions","行动"],["shop","兑换"],["ledger","记账"],["custom","自定义"]
+    ].map(([id,txt])=>`<button class="tab ${state.tab===id?"active":""}" data-tab="${id}">${txt}</button>`).join("")}</div></nav>`;
+  bindEvents();
+}
+function bindEvents() {
+  $$("[data-tab]").forEach(b => b.onclick = () => setState({ tab: b.dataset.tab }));
+  $$("[data-undo]").forEach(b => b.onclick = () => {
+    const item = state.log.find(i=>i.id===b.dataset.undo);
+    if (item && item.snapshot) {
+      restoreSnapshot(item.snapshot);
+      item.undone = true; item.message = `已撤回：${item.message}`;
+      saveState(); render();
+    }
+  });
+  $$("[data-action]").forEach(b => b.onclick = () => runAction(b.dataset.action));
+  $$("[data-redeem]").forEach(b => b.onclick = () => redeem(b.dataset.redeem));
+  $$("[data-undo-ledger]").forEach(b => b.onclick = () => { state.ledger = state.ledger.map(i=>i.id===b.dataset.undoLedger?{...i,undone:true}:i); saveState(); render(); });
+  $$("[data-run-custom]").forEach(b => b.onclick = () => runCustomAction(Number(b.dataset.runCustom)));
+  const weightInput = $("#weightInput"); if (weightInput) weightInput.oninput = e => { state.weightInput = e.target.value; saveState(); };
+  const sel = $("#selectedSkill"); if (sel) sel.onchange = e => { state.selectedSkill = e.target.value; saveState(); render(); };
+  const lm = $("#ledgerMonth"); if (lm) lm.onchange = e => { state.ledgerMonth = e.target.value; saveState(); render(); };
+  const pc = $("#pageColor"); if (pc) pc.oninput = e => { state.pageColor=e.target.value; saveState(); render(); };
+  const pct = $("#pageColorText"); if (pct) pct.onchange = e => { state.pageColor=e.target.value || DEFAULT_PAGE_COLOR; saveState(); render(); };
+  const file = $("#importFile"); if (file) file.onchange = importData;
+}
+function pullInputs() {
+  if ($("#readBookMinutes")) state.actionMinutes.readBook = $("#readBookMinutes").value;
+  if ($("#learnLanguageMinutes")) state.actionMinutes.learnLanguage = $("#learnLanguageMinutes").value;
+  if ($("#learnSkillMinutes")) state.actionMinutes.learnSkill = $("#learnSkillMinutes").value;
+  if ($("#ledgerDate")) state.ledgerForm.date = $("#ledgerDate").value;
+  if ($("#ledgerName")) state.ledgerForm.name = $("#ledgerName").value;
+  if ($("#ledgerAmount")) state.ledgerForm.amount = $("#ledgerAmount").value;
+}
+function runAction(action) {
+  pullInputs();
+  resetDailyGainIfNeeded();
+  const snap = snapshot();
+  if (action === "updateWeight") {
+    const nextWeight = round2(toNum(state.weightInput, state.stats.weight));
+    if (nextWeight <= 0) { addSystemLog("请输入有效的当前体重。"); saveState(); render(); return; }
+    const nextPointTotal = calculateWeightPointTotal(nextWeight);
+    const pointDelta = nextPointTotal - state.weightPointsApplied;
+    const nextHealthTotal = calculateHealthFromWeight(nextWeight);
+    const healthDelta = round2(nextHealthTotal - state.weightHealthApplied);
+    const weightDelta = round2(nextWeight - state.stats.weight);
+    state.weightPointsApplied = nextPointTotal;
+    state.weightHealthApplied = nextHealthTotal;
+    if (pointDelta !== 0) changePoints(pointDelta, "更新体重");
+    state.stats = { ...state.stats, weight: nextWeight, health: round2(clamp(state.stats.health + healthDelta, 0, 100)) };
+    recordHistory(state.stats);
+    const direction = weightDelta < 0 ? `减重 ${Math.abs(weightDelta)} 斤` : weightDelta > 0 ? `增重 ${weightDelta} 斤` : "体重不变";
+    addLog(`更新体重：${direction}，健康值 ${healthDelta >= 0 ? "+" : ""}${healthDelta}，积分 ${pointDelta >= 0 ? "+" : ""}${pointDelta}。`, snap);
+  }
+  if (action === "readLiterature") {
+    const researchCanGain = state.dailyGain.readPaperResearch < 0.1;
+    const ambitionCanGain = state.dailyGain.readPaperAmbition < 0.1;
+    if (!researchCanGain && !ambitionCanGain) {
+      changePoints(1, "读文献");
+      addLog("读文献完成：今日科研和进取心加成已达上限，但仍获得 1 积分。", snap);
+    } else {
+      const researchGain = researchCanGain ? 0.01 : 0;
+      const ambitionGain = ambitionCanGain ? 0.01 : 0;
+      addSkillExp("科研", researchGain); addStats({ ambition: ambitionGain });
+      state.dailyGain.readPaperResearch = round2(state.dailyGain.readPaperResearch + researchGain);
+      state.dailyGain.readPaperAmbition = round2(state.dailyGain.readPaperAmbition + ambitionGain);
+      changePoints(1, "读文献");
+      addLog(`读文献：科研经验 +${researchGain}，进取心 +${ambitionGain}，积分 +1。`, snap);
+    }
+  }
+  if (action === "writePaper") {
+    addSkillExp("科研", 0.01); addStats({ ambition: 0.01 }); changePoints(1, "写论文");
+    if (!state.paperAccepted) {
+      state.paperProgress = clamp(state.paperProgress + 1, 0, 100);
+      if (state.paperProgress >= 100) { state.paperAccepted = true; addSkillExp("科研", 1); addStats({ ambition: 1 }); }
+    }
+    addLog(`写论文：进度 ${state.paperProgress}%，科研经验 +0.01，进取心 +0.01，积分 +1。`, snap);
+  }
+  if (action === "readBook") { const m=Math.max(0,toNum(state.actionMinutes.readBook,60)); const r=m/60; addStats({knowledge:round2(.01*r)}); changePoints(round2(r),"读书"); addLog(`读书 ${m} 分钟：知识 +${round2(.01*r)}，积分 +${round2(r)}。`, snap); }
+  if (action === "learnLanguage") { const m=Math.max(0,toNum(state.actionMinutes.learnLanguage,60)); const r=m/60; addSkillExp("外语",round2(.01*r)); changePoints(round2(r),"学外语"); addLog(`学外语 ${m} 分钟：外语技能经验 +${round2(.01*r)}，积分 +${round2(r)}。`, snap); }
+  if (action === "learnSkill") { const m=Math.max(0,toNum(state.actionMinutes.learnSkill,60)); const r=m/60; addSkillExp(state.selectedSkill,round2(.01*r)); changePoints(round2(r),"学技能"); addLog(`学技能 ${m} 分钟：${state.selectedSkill} 技能经验 +${round2(.01*r)}，积分 +${round2(r)}。`, snap); }
+  if (action === "lightWorkout") { addStats({health:.02, ambition:.02}); addSkillExp("健身",.02); changePoints(1,"轻度运动"); addLog("轻度运动：健康 +0.02，进取心 +0.02，健身技能经验 +0.02，积分 +1。", snap); }
+  if (action === "mediumWorkout") { addStats({health:.05, ambition:.05}); addSkillExp("健身",.05); changePoints(1,"中度运动"); addLog("中度运动：健康 +0.05，进取心 +0.05，健身技能经验 +0.05，积分 +1。", snap); }
+  if (action === "sing") { addSkillExp("唱歌",.01); changePoints(1,"唱歌"); addLog("唱歌：唱歌技能经验 +0.01，积分 +1。", snap); }
+  if (action === "addLedger") {
+    const name = (state.ledgerForm.name || "").trim();
+    const amount = round2(toNum(state.ledgerForm.amount, 0));
+    const date = state.ledgerForm.date || getLocalDateISO();
+    if (!name || amount <= 0) addSystemLog("请输入有效的记账项目和金额。");
+    else { state.ledger = [{ id:makeId(), date, name, amount, undone:false }, ...state.ledger]; state.ledgerForm.name=""; state.ledgerForm.amount=""; }
+  }
+  if (action === "addSkill") { const name=($("#newSkillName")?.value||"").trim(); if (name && !state.skills[name]) { state.skills[name]={levelIndex:0,exp:0}; state.newSkillName=""; addLog(`已添加技能：${name}。`, snap); } }
+  if (action === "addCustomAction") {
+    const a = { name:($("#customActionName")?.value||"").trim(), stat:$("#customStat")?.value||"none", skill:$("#customSkill")?.value||"none", statAmount:toNum($("#customStatAmount")?.value), skillAmount:toNum($("#customSkillAmount")?.value), points:toNum($("#customPoints")?.value,1), unit:$("#customUnit")?.value||"time" };
+    state.customAction = { ...a, statAmount:String(a.statAmount), skillAmount:String(a.skillAmount), points:String(a.points) };
+    if (a.name) { state.customActions.push(a); addLog(`已添加自定义行动：${a.name}。`, snap); }
+  }
+  if (action === "addReward") {
+    const name=($("#rewardName")?.value||"").trim(); const cost=Math.max(1, round2(toNum($("#rewardCost")?.value, 1)));
+    state.customReward = { name, cost:String(cost) };
+    if (name) { state.shopItems.push({ name, cost }); addLog(`已添加兑换奖励：${name}，需要 ${cost} 积分。`, snap); }
+  }
+  if (action === "export") return exportData();
+  if (action === "clear") { if (confirm("确定要清空所有保存数据吗？这个操作不能撤回。")) { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(WEEKLY_AMBITION_PENALTY_KEY); location.reload(); } return; }
+  saveState(); render();
+}
+function redeem(name) {
+  const item = state.shopItems.find(i=>i.name===name);
+  if (!item || state.points < item.cost) return;
+  const snap = snapshot();
+  changePoints(-item.cost, `兑换：${item.name}`);
+  state.redeemed = [{ id:makeId(), name:item.name, cost:item.cost, date:getTodayText() }, ...state.redeemed];
+  addLog(`兑换成功：${item.name}，消耗 ${item.cost} 积分。`, snap);
+  saveState(); render();
+}
+function runCustomAction(index) {
+  const action = state.customActions[index];
+  if (!action) return;
+  const snap = snapshot();
+  const hours = $(`[data-custom-hours="${index}"]`)?.value;
+  const multiplier = action.unit === "hour" ? Math.max(0, toNum(hours, 1)) : 1;
+  const statDelta = round2(action.statAmount * multiplier);
+  const skillDelta = round2(action.skillAmount * multiplier);
+  const pointDelta = round2(action.points * multiplier);
+  if (action.stat !== "none") addStats({ [action.stat]: statDelta });
+  if (action.skill !== "none") addSkillExp(action.skill, skillDelta);
+  changePoints(pointDelta, action.name);
+  addLog(`${action.name}：${action.unit==="hour"?`${multiplier} 小时，`:""}积分 ${pointDelta>=0?"+":""}${pointDelta}。`, snap);
+  saveState(); render();
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify({ ...state, tab: undefined }, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `地球online读博版备份-${getLocalDateISO()}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      localStorage.setItem(SAVE_KEY, JSON.stringify(parsed));
+      location.reload();
+    } catch { alert("导入失败：文件格式不正确。"); }
+  };
+  reader.readAsText(file);
+}
+
+render();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(console.error);
+  });
+}
+</script>
+</body>
+</html>
